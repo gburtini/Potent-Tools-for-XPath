@@ -1,5 +1,7 @@
 Potent Tools for XPath and CSS
 ==============================
+![Potent.js](https://d2ppvlu71ri8gs.cloudfront.net/items/1i3H1E3A2A0u0r1m0U44/potent-short-left.png)
+
 [![Build Status](https://travis-ci.org/gburtini/Potent-Tools-for-XPath.svg?branch=master)](https://travis-ci.org/gburtini/Potent-Tools-for-XPath)
 
 Tools for working with the DOM, CSS selectors and XPath 1.0 expressions. All functionality in this repository is derived from [Firebug](https://raw.githubusercontent.com/firebug/firebug/master/extension/content/firebug/lib/xpath.js), and has been modified for readability and to support pseudo-DOM, unit testing and ES6 standards.
