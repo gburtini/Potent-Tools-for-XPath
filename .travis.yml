@@ -2,11 +2,8 @@ language: node_js
 sudo: false
 cache: yarn
 node_js:
-  - "iojs"
   - "7"
   - "6"
-  - "5"
-  - "iojs"
 install:
   - yarn
 script:
