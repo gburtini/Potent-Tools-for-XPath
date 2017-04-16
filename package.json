@@ -1,7 +1,7 @@
 {
   "name": "potent-tools",
   "library": "potentTools",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A port, package and unit testing of Firebug's XPath parsing and processing tools.",
   "keywords": ["xpath", "xml", "css", "firebug", "dom", "jsdom", "xpath-expressions", "css-selectors", "path", "evaluate"],
   "main": "index.js",
