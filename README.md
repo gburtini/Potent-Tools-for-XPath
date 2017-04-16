@@ -17,7 +17,7 @@ Installation
 Usage
 -----
 
-```
+```js
 const generators = require('potent-tools').generators;
 const xpath = generators.getElementXPath(domElement);
 console.log(xpath); // /html/head/body/table/tr[2]/td/strong[@class='title']
