@@ -29,11 +29,7 @@ function element(string) {
     retVal.elementName = matches[2];
   }
 
-  return {
-    fullGroup: matches[0],
-    specialSelectorType: matches[1],
-    specialSelectorValue: matches[2],
-  };
+  return retVal;
 }
 
 /**
@@ -42,7 +38,7 @@ function element(string) {
  */
 function attributePresence(string) {
   const CSS_ATTRIBUTE_PRESENCE_PATTERN = /^\[([^\]]*)\]/i;
-  const matches = CSS_ATTRIBUTE_PRESENCE_PATTERN.match(string);
+  const matches = CSS_ATTRIBUTE_PRESENCE_PATTERN.exec(string);
   if (!matches) return matches;
 
   return {
@@ -54,10 +50,12 @@ function attributePresence(string) {
 /**
  * `attributeValue(string)` matches the pieces of a CSS selector that represent a attribute selector.
  *  e.g., [disabled='disabled'], [class~='alphaghettis'], [type != 'number']
+ * 
+ * TODO: this pattern fails on single or unquoted things. Bad!
  */
 function attributeValue(string) {
   const CSS_ATTRIBUTE_VALUE_PATTERN = /^\[\s*([^~=\s]+)\s*(~?=)\s*"([^"]+)"\s*\]/i;
-  const matches = CSS_ATTRIBUTE_VALUE_PATTERN.match(string);
+  const matches = CSS_ATTRIBUTE_VALUE_PATTERN.exec(string);
   if (!matches) return matches;
 
   return {
@@ -75,7 +73,7 @@ function attributeValue(string) {
 // TODO: verify this works with parentheses, e.g., nth-child(2).
 function pseudo(string) {
   const CSS_PSEUDO_PATTERN = /^:([a-z_-])+/i;
-  const matches = CSS_PSEUDO_PATTERN.match(string);
+  const matches = CSS_PSEUDO_PATTERN.exec(string);
   if (!matches) return matches;
 
   return {
@@ -90,7 +88,7 @@ function pseudo(string) {
  */
 function combinator(string) {
   const CSS_COMBINATOR_PATTERN = /^(\s*[>+\s])?/i;
-  const matches = CSS_PSEUDO_PATTERN.match(string);
+  const matches = CSS_COMBINATOR_PATTERN.exec(string);
   if (!matches) return matches;
 
   return {
@@ -103,7 +101,7 @@ function combinator(string) {
  */
 function comma(string) {
   const COMMA_PATTERN = /^\s*,/i;
-  const matches = COMMA_PATTERN.match(string);
+  const matches = COMMA_PATTERN.exec(string);
   if (!matches) return matches;
 
   return {
