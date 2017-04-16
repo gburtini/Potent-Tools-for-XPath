@@ -3,6 +3,7 @@
   "library": "potentTools",
   "version": "1.0.0",
   "description": "A port, package and unit testing of Firebug's XPath parsing and processing tools.",
+  "keywords": ["xpath", "xml", "css", "firebug", "dom", "jsdom", "xpath-expressions", "css-selectors", "path", "evaluate"]
   "main": "index.js",
   "scripts": {
     "test": "mocha test",
@@ -13,7 +14,6 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "jsdom": "^9.12.0",
-    "lodash": "^4.17.4",
     "xpath": "^0.0.24"
   },
   "devDependencies": {
