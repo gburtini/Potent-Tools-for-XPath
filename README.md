@@ -22,6 +22,8 @@ const xpath = generators.getElementXPath(domElement);
 console.log(xpath); // /html/head/body/table/tr[2]/td/strong[@class='title']
 ```
 
+Other usage is documented in our [tests](test), at the moment.
+
 It should be possible to use our [builds](dist) on the web as well, as they simply ignore the polyfills if they're already present.
 
 License
