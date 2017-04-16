@@ -1,5 +1,13 @@
 const cssToXPath = require('./cssToXPath');
-const {XPathResult, evaluate} = require('xpath');
+
+// This is the weirdest line in the entire product, but this supports node environment and
+// web browser environment without conditionally including the xpath module, which is important
+// because otherwise the variable reference is strange.
+if (typeof XPathResult === 'undefined') {
+  const xpath = require('xpath');
+  evaluate = xpath.evaluate;
+  XPathResult = xpath.XPathResult;
+}
 
 /**
  * Evaluates an XPath expression.

@@ -17,32 +17,10 @@ const config = {
     libraryTarget: 'umd',
     umdNamedDefine: true,
   },
-  module: {
-    loaders: [
-      {
-        test: /(\.jsx|\.js)$/,
-        loader: 'babel',
-        exclude: /(node_modules|bower_components)/,
-      },
-    ],
-  },
-  externals: {
-    xpath: {
-      commonjs: 'xpath',
-      commonjs2: 'xpath',
-      amd: 'xpath',
-      root: 'xpath',
-    },
-    jsdom: {
-      commonjs: 'jsdom',
-      commonjs2: 'jsdom',
-      amd: 'jsdom',
-      root: 'jsdom',
-    },
-  },
+  externals: {},
   resolve: {
-    root: path.resolve('./src'),
-    extensions: ['', '.js'],
+    //root: path.resolve('./src'),
+    extensions: ['.js'],
   },
   plugins: minify
     ? [

@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test",
-    "coverage": "istanbul test"
+    "coverage": "./node_modules/.bin/istanbul cover -- node_modules/.bin/_mocha",
+    "build": "WEBPACK_ENV=build webpack"
   },
   "author": "Giuseppe Burtini and the Firebug team",
   "license": "BSD-3-Clause",
