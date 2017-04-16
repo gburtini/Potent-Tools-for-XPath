@@ -1,0 +1,30 @@
+{
+  "name": "potent-tools",
+  "library": "potentTools",
+  "version": "1.0.0",
+  "description": "A port, package and unit testing of Firebug's XPath parsing and processing tools.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test",
+    "coverage": "istanbul test"
+  },
+  "author": "Giuseppe Burtini and the Firebug team",
+  "license": "BSD-3-Clause",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "xmldom": "^0.1.27",
+    "xpath": "^0.0.24"
+  },
+  "devDependencies": {
+    "istanbul": "^0.4.5",
+    "webpack": "^2.4.1",
+    "chai": "^3.5.0",
+    "eslint": "^3.18.0",
+    "eslint-config-airbnb": "^13.0.0",
+    "eslint-config-strawhouse": "^2.1.5",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jsx-a11y": "^2.2.3",
+    "eslint-plugin-react": "^6.10.3",
+    "mocha": "^3.2.0"
+  }
+}
