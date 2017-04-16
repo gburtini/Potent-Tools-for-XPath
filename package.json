@@ -11,13 +11,11 @@
   "author": "Giuseppe Burtini and the Firebug team",
   "license": "BSD-3-Clause",
   "dependencies": {
+    "jsdom": "^9.12.0",
     "lodash": "^4.17.4",
-    "xmldom": "^0.1.27",
     "xpath": "^0.0.24"
   },
   "devDependencies": {
-    "istanbul": "^0.4.5",
-    "webpack": "^2.4.1",
     "chai": "^3.5.0",
     "eslint": "^3.18.0",
     "eslint-config-airbnb": "^13.0.0",
@@ -25,6 +23,8 @@
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.10.3",
-    "mocha": "^3.2.0"
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "webpack": "^2.4.1"
   }
 }

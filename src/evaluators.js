@@ -1,5 +1,5 @@
 const cssToXPath = require('./cssToXPath');
-const { XPathResult, evaluate } = require('xpath');
+const {XPathResult, evaluate} = require('xpath');
 
 /**
  * Evaluates an XPath expression.
@@ -21,7 +21,7 @@ function evaluateXPath(
   doc,
   xpath,
   contextNode = doc,
-  resultType = XPathResult.ANY_TYPE
+  resultType = XPathResult.ANY_TYPE,
 ) {
   const evaluateMethod = doc.evaluate || evaluate;
   const result = evaluateMethod(xpath, contextNode, null, resultType, null);

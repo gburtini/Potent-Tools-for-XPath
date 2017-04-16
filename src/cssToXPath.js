@@ -10,7 +10,7 @@ function specialSelectorToXPathPiece(element) {
       break;
     default:
       throw new Error(
-        `Invalid special selector type: ${element.specialSelectorType}.`
+        `Invalid special selector type: ${element.specialSelectorType}.`,
       );
   }
 }
@@ -47,7 +47,11 @@ function cssToXPath(rule) {
     const attribute = patterns.attributeValue(rule);
     if (attribute) {
       // matched a rule like [field~='thing'] or [name='Title']
-      if (attribute.isContains) { parts.push(`[contains(@${attribute.field}, '${attribute.value}')]`); } else { parts.push(`[@${attribute.field}='${attribute.value}']`); }
+      if (attribute.isContains) {
+        parts.push(`[contains(@${attribute.field}, '${attribute.value}')]`);
+      } else {
+        parts.push(`[@${attribute.field}='${attribute.value}']`);
+      }
 
       rule = rule.substr(attribute.fullMatch.length);
     } else {
@@ -73,8 +77,13 @@ function cssToXPath(rule) {
     // Match combinators, e.g. html > body or html + body.
     const combinator = patterns.combinator(rule);
     if (combinator && combinator.fullMatch.length) {
-      if (combinator.fullMatch.indexOf('>') != -1) parts.push('/');
-      else if (combinator.fullMatch.indexOf('+') != -1) { parts.push('/following-sibling::'); } else { parts.push('//'); }
+      if (combinator.fullMatch.indexOf('>') != -1)
+        parts.push('/');
+      else if (combinator.fullMatch.indexOf('+') != -1) {
+        parts.push('/following-sibling::');
+      } else {
+        parts.push('//');
+      }
 
       index = parts.length;
       parts.push('*');

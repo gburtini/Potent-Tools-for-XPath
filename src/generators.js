@@ -1,4 +1,4 @@
-const { Node } = require('xmldom');
+const DOCUMENT_TYPE_NODE = 10; //https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
 
 /**
  * Produces an XPath expression for the attributes of an element.
@@ -20,7 +20,7 @@ function getElementAttributes(element) {
 /**
  * Parses a tree starting from `startingElement` to produce an XPath expression.
  */
-function getElementTreeXPath(startingElement) {
+function getElementTreeXPath(startingElement, asString = true) {
   const paths = [];
 
   // Use nodeName (instead of localName) so namespace prefix is included (if any).
@@ -29,31 +29,47 @@ function getElementTreeXPath(startingElement) {
     element && element.nodeType === 1;
     element = element.parentNode
   ) {
-    let index = 1;
+    let index = 0;
     for (
       let sibling = element.previousSibling;
       sibling;
       sibling = sibling.previousSibling
     ) {
       // Ignore document type declaration.
-      if (sibling.nodeType === Node.DOCUMENT_TYPE_NODE) continue;
+      if (sibling.nodeType === DOCUMENT_TYPE_NODE) continue;
       if (sibling.nodeName === element.nodeName) index += 1;
     }
 
-    const tagName = element.nodeName.toLowerCase();
-    const rules = getElementAttributes(element);
+    const tagName = (element.prefix ? element.prefix + ':' : '') +
+      element.localName;
+
+    const attributes = getElementAttributes(element);
+    let hasFollowingSiblings = false;
+    for (
+      let sibling = element.nextSibling;
+      sibling && !hasFollowingSiblings;
+      sibling = sibling.nextSibling
+    ) {
+      if (sibling.nodeName == element.nodeName) hasFollowingSiblings = true;
+    }
 
     const node = {
       tag: tagName,
       index,
-      parameters: rules,
+      attributes,
       elements: [element], // the list of things that made up this node
     };
 
+    const pathIndex = index || hasFollowingSiblings
+      ? '[' + (index + 1) + ']'
+      : '';
+    const returnValue = asString ? tagName + pathIndex : node;
+
     // push to front of array.
-    paths.splice(0, 0, node);
+    paths.splice(0, 0, returnValue);
   }
 
+  if (asString) return paths.length ? '/' + paths.join('/') : null;
   return paths.length ? paths : null;
 }
 

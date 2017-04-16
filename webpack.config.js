@@ -33,11 +33,11 @@ const config = {
       amd: 'xpath',
       root: 'xpath',
     },
-    xmldom: {
-      commonjs: 'xmldom',
-      commonjs2: 'xmldom',
-      amd: 'xmldom',
-      root: 'xmldom',
+    jsdom: {
+      commonjs: 'jsdom',
+      commonjs2: 'jsdom',
+      amd: 'jsdom',
+      root: 'jsdom',
     },
   },
   resolve: {
