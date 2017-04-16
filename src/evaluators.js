@@ -21,11 +21,12 @@ function evaluateXPath(
   doc,
   xpath,
   contextNode = doc,
-  resultType = XPathResult.ANY_TYPE,
+  resultType = XPathResult.ANY_TYPE
 ) {
   const evaluateMethod = doc.evaluate || evaluate;
   const result = evaluateMethod(xpath, contextNode, null, resultType, null);
 
+  const nodes = [];
   switch (result.resultType) {
     case XPathResult.NUMBER_TYPE:
       return result.numberValue;
@@ -38,7 +39,6 @@ function evaluateXPath(
 
     case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
     case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
-      const nodes = [];
       for (let item = result.iterateNext(); item; item = result.iterateNext()) {
         nodes.push(item);
       }
@@ -46,7 +46,6 @@ function evaluateXPath(
 
     case XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE:
     case XPathResult.ORDERED_NODE_SNAPSHOT_TYPE:
-      const nodes = [];
       for (let i = 0; i < result.snapshotLength; ++i) {
         nodes.push(result.snapshotItem(i));
       }
