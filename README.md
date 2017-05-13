@@ -42,6 +42,6 @@ I will accept pull requests which do not deviate from the intent of the original
 - In general, readability will be preferred to conciseness. 
 - Please ensure all unit tests pass (`yarn test`).
 - Please ensure new code has sufficient coverage (`yarn run coverage`).
-- Please ensure code has been linted to meet our formatting standards (we use [eslint-config-strawhouse](https://www.npmjs.com/package/eslint-config-strawhouse) and [Prettier](https://github.com/prettier/prettier)).
+- Please ensure code has been linted to meet the formatting standards (I use [eslint-config-strawhouse](https://www.npmjs.com/package/eslint-config-strawhouse) and [Prettier](https://github.com/prettier/prettier)).
 
 To build a web distribution, `yarn run build` should update the files in `dist/`.
