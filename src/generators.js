@@ -1,7 +1,5 @@
-// TODO: this should probably be moved out in to something that gets webpacked away, because
-// the browser will already have this.
 if (typeof Node === 'undefined') {
-  // https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
+  // Non-browser polyfill for https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
   Node = { DOCUMENT_TYPE_NOTE: 10 };
 }
 
