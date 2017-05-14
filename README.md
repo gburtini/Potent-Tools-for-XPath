@@ -24,24 +24,31 @@ const { generators, evaluators, cssToXPath } = require('potent-tools');
 
 { // generators: generate XPath queries from elements.
   /*
-  * Get the XPath string for a given DOM element: getElememtXPath(element)
+  * getElememtXPath(element)
+  * Get the XPath string for a given DOM element.
   */
   const xpath = generators.getElementXPath(domElement);
-  console.log(xpath); // /html/head/body/table/tr[2]/td/strong[@class='title']
+  // /html/head/body/table/tr[2]/td/strong[@class='title']
+  console.log(xpath); 
 
 
   /*
-  * Get the fully qualified XPath string for a DOM element that has an ID: generators.getElementXPath(element, skipId)
-  * e.g., `<html><body><div id='bob'></div></body></html>` - if you were to target the 'bob' element
-  * a simple, valid xpath is `//*[@id='bob']` as IDs are expected to be unique.
+  * generators.getElementXPath(element, skipId)
+  * Get the fully qualified XPath string for a DOM element that has an ID, ignoring ID.
+  * e.g., `<html><body><div id='bob'></div></body></html>`
   */
   const xpath = generators.getElementXPath(bobElement, skipId = true);
   console.log(xpath); // /html/body/div[1]
 
+  
+  const xpath = generators.getElementXPath(bobElement, skipId = false);
+  console.log(xpath); // //*[@id='bob']
+
 
   /*
-  * Get all the HTML attributes on an element: generators.getElementAttributes(element)
-  * This is exposed, but it is really just a support method for the XPath generator.
+  * generators.getElementAttributes(element)
+  * Get all the HTML attributes on an element. 
+  * This is exposed, but it is a support method for the XPath generator.
   */
   const attributes = generators.getElementAttributes(bobElement);
   console.log(bobElement); // { id: 'bob' }
@@ -49,29 +56,45 @@ const { generators, evaluators, cssToXPath } = require('potent-tools');
 
 { // evaluators: run XPath queries or CSS selectors to find elements
   /*
-   * Get elements by XPath: evaluators.getElementsByXPath(document, xpathQuery)
+   * evaluators.getElementsByXPath(document, xpathQuery)
+   * Get elements by XPath query.
    */
-  const elements = evaluators.getElementsByXPath(document, '/html/body/div');
+  // element return type...
+  const elements = evaluators.getElementsByXPath(
+    document, 
+    '/html/body/div'
+  );
   console.log(elements); // [ DOMElement ]
 
-  const elements = evaluators.getElementsByXPath(document, '/html/body/div/text()');
+  // string return type...
+  const elements = evaluators.getElementsByXPath(
+    document, 
+    '/html/body/div/text()'
+  );
   console.log(elements); // [ "Hello world" ]
 
   /*
-   * Get elements by CSS selector: getElementsBySelector(document, rule)
+   * getElementsBySelector(document, rule)
+   * Get elements by CSS selector.
    */
   const elements = evaluators.getElementsBySelector(document, 'html > body > div#id');
   console.log(elements); // [ DOMElement ]
 
   /*
-   * Execute a query on a document: evaluators.evaluateXPath(doc, xpath, contextNode, resultType)
+   * evaluators.evaluateXPath(doc, xpath, contextNode, resultType)
+   * Execute a query on a document.
    * e.g., <html><body><div id='bob'>Hello world</div></body></html>
    */
   const doc = document;
   const xpath = '/html/body/div'
   const contextNode = document; // optional, defaults to the document
   const resultType = XPathResult.STRING_TYPE; // optional, defaults to ANY_TYPE.
-  const stringResult = evaluators.evaluateXPath(doc, xpath, contextNode, resultType);
+  const stringResult = evaluators.evaluateXPath(
+    doc,
+    xpath,
+    contextNode,
+    resultType
+  );
   console.log(stringResult); // "Hello world"
 }
 
