@@ -18,14 +18,72 @@ Usage
 -----
 
 ```
-const generators = require('potent-tools').generators;
-const xpath = generators.getElementXPath(domElement);
-console.log(xpath); // /html/head/body/table/tr[2]/td/strong[@class='title']
+const { generators, evaluators, cssToXPath } = require('potent-tools');
+
+{ // generators: generate XPath queries from elements.
+
+  /*
+  * Get the XPath string for a given DOM element: getElememtXPath(element)
+  */
+  const xpath = generators.getElementXPath(domElement);
+  console.log(xpath); // /html/head/body/table/tr[2]/td/strong[@class='title']
+
+
+  /*
+  * Get the fully qualified XPath string for a DOM element that has an ID: generators.getElementXPath(element, skipId)
+  * e.g., `<html><body><div id='bob'></div></body></html>` - if you were to target the 'bob' element
+  * a simple, valid xpath is `//*[@id='bob']` as IDs are expected to be unique.
+  */
+  const xpath = generators.getElementXPath(bobElement, skipId = true);
+  console.log(xpath); // /html/body/div[1]
+
+
+  /*
+  * Get all the HTML attributes on an element: generators.getElementAttributes(element)
+  * This is exposed, but it is really just a support method for the XPath generator.
+  */
+  const attributes = generators.getElementAttributes(bobElement);
+  console.log(bobElement); // { id: 'bob' }
+}
+
+{ // evaluators: run XPath queries or CSS selectors to find elements
+
+  /*
+   * Get elements by XPath: evaluators.getElementsByXPath(document, xpathQuery)
+   */
+  const elements = evaluators.getElementsByXPath(document, '/html/body/div');
+  console.log(elements); // [ DOMElement ]
+
+  const elements = evaluators.getElementsByXPath(document, '/html/body/div/text()');
+  console.log(elements); // [ "Hello world" ]
+
+  /*
+   * Get elements by CSS selector: getElementsBySelector(document, rule)
+   */
+  const elements = evaluators.getElementsBySelector(document, 'html > body > div#id');
+  console.log(elements); // [ DOMElement ]
+
+  /*
+   * Execute a query on a document: evaluators.evaluateXPath(doc, xpath, contextNode, resultType)
+   * e.g., <html><body><div id='bob'>Hello world</div></body></html>
+   */
+  const doc = document;
+  const xpath = '/html/body/div'
+  const contextNode = document; // optional, defaults to the document
+  const resultType = XPathResult.STRING_TYPE; // optional, defaults to ANY_TYPE.
+  const stringResult = evaluators.evaluateXPath(doc, xpath, contextNode, resultType);
+  console.log(stringResult); // "Hello world"
+}
+
+{ // cssToXPath: convert CSS queries to XPath queries
+
+  console.log(cssToXPath('html > body')); // //html>body
+}
+
+
 ```
 
-Other usage is documented in our [tests](test), at the moment.
-
-It should be possible to use our [builds](dist) on the web as well, as they simply ignore the polyfills if they're already present.
+We have some [tests](test) that document this functionality as well. It should be possible to use our [builds](dist) on the web as well, as they simply ignore the polyfills if they're already present.
 
 License
 -------
