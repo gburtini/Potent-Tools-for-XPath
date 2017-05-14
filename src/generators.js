@@ -14,9 +14,6 @@ function getElementAttributes(element) {
     ret[attribute.nodeName] = attribute.nodeValue;
   }
 
-  if (ret === {}) {
-    return null;
-  }
   return ret;
 }
 
