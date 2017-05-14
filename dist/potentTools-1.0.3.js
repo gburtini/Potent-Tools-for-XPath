@@ -91,7 +91,9 @@ function specialSelectorToXPathPiece(element) {
       return `[contains(concat(' ',normalize-space(@class),' '), ' ${element.specialSelectorValue} ')]`;
       break;
     default:
-      throw new Error(`Invalid special selector type: ${element.specialSelectorType}.`);
+      throw new Error(
+        `Invalid special selector type: ${element.specialSelectorType}.`
+      );
   }
 }
 
@@ -157,9 +159,9 @@ function cssToXPath(rule) {
     // Match combinators, e.g. html > body or html + body.
     const combinator = patterns.combinator(rule);
     if (combinator && combinator.fullGroup.length) {
-      if (combinator.fullGroup.indexOf('>') != -1)
+      if (combinator.fullGroup.indexOf('>') != -1) {
         parts.push('/');
-      else if (combinator.fullGroup.indexOf('+') != -1) {
+      } else if (combinator.fullGroup.indexOf('+') != -1) {
         parts.push('/following-sibling::');
       } else {
         parts.push('//');
@@ -242,7 +244,7 @@ function attributePresence(string) {
 /**
  * `attributeValue(string)` matches the pieces of a CSS selector that represent a attribute selector.
  *  e.g., [disabled='disabled'], [class~='alphaghettis'], [type != 'number']
- * 
+ *
  * TODO: this pattern fails on single or unquoted things. Bad!
  */
 function attributeValue(string) {
@@ -337,7 +339,7 @@ if (typeof XPathResult === 'undefined') {
  * @returns {*} The result of the XPath expression, depending on resultType:
  * - XPathResult.NUMBER_TYPE: returns a Number
  * - XPathResult.STRING_TYPE: returns a String
- * - XPathResult.BOOLEAN_TYP: returns a boolean
+ * - XPathResult.BOOLEAN_TYPE: returns a boolean
  * - XPathResult.UNORDERED_NODE_ITERATOR_TYPE or XPathResult.ORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
  * - XPathResult.ORDERED_NODE_SNAPSHOT_TYPE or XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
  * - XPathResult.ANY_UNORDERED_NODE_TYPE or XPathResult.FIRST_ORDERED_NODE_TYPE: returns a single node
@@ -382,6 +384,14 @@ function evaluateXPath(
   }
 }
 
+function getElementsByXPath(doc, xpath) {
+  try {
+    return evaluateXPath(doc, xpath);
+  } catch (ex) {
+    return [];
+  }
+}
+
 function getRuleMatchingElements(rule, doc) {
   const css = rule.selectorText;
   const xpath = cssToXPath(css);
@@ -391,14 +401,6 @@ function getRuleMatchingElements(rule, doc) {
 function getElementsBySelector(doc, css) {
   const xpath = cssToXPath(css);
   return getElementsByXPath(doc, xpath);
-}
-
-function getElementsByXPath(doc, xpath) {
-  try {
-    return evaluateXPath(doc, xpath);
-  } catch (ex) {
-    return [];
-  }
 }
 
 module.exports = {
@@ -413,10 +415,13 @@ module.exports = {
 /* 3 */
 /***/ (function(module, exports) {
 
-const DOCUMENT_TYPE_NODE = 10; //https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
+if (typeof Node === 'undefined') {
+  // Non-browser polyfill for https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
+  Node = { DOCUMENT_TYPE_NOTE: 10 };
+}
 
 /**
- * Produces an XPath expression for the attributes of an element.
+ * Produces an object of attributes of an element.
  */
 function getElementAttributes(element) {
   const attributes = element.attributes;
@@ -426,14 +431,12 @@ function getElementAttributes(element) {
     ret[attribute.nodeName] = attribute.nodeValue;
   }
 
-  if (ret === {}) {
-    return null;
-  }
   return ret;
 }
 
 /**
  * Parses a tree starting from `startingElement` to produce an XPath expression.
+ * TODO: it seems awkward that this has `asString` instead of being cast in the getElementXPath method; but this is the original design.
  */
 function getElementTreeXPath(startingElement, asString = true) {
   const paths = [];
@@ -451,11 +454,11 @@ function getElementTreeXPath(startingElement, asString = true) {
       sibling = sibling.previousSibling
     ) {
       // Ignore document type declaration.
-      if (sibling.nodeType === DOCUMENT_TYPE_NODE) continue;
+      if (sibling.nodeType === Node.DOCUMENT_TYPE_NODE) continue;
       if (sibling.nodeName === element.nodeName) index += 1;
     }
 
-    const tagName = (element.prefix ? element.prefix + ':' : '') +
+    const tagName = (element.prefix ? `${element.prefix}:` : '') +
       element.localName;
 
     const attributes = getElementAttributes(element);
@@ -476,7 +479,7 @@ function getElementTreeXPath(startingElement, asString = true) {
     };
 
     const pathIndex = index || hasFollowingSiblings
-      ? '[' + (index + 1) + ']'
+      ? `[${index + 1}]`
       : '';
     const returnValue = asString ? tagName + pathIndex : node;
 
@@ -484,7 +487,7 @@ function getElementTreeXPath(startingElement, asString = true) {
     paths.splice(0, 0, returnValue);
   }
 
-  if (asString) return paths.length ? '/' + paths.join('/') : null;
+  if (asString) return paths.length ? `/${paths.join('/')}` : null;
   return paths.length ? paths : null;
 }
 
@@ -5252,4 +5255,4 @@ exports.select1 = function(e, doc) {
 /***/ })
 /******/ ]);
 });
-//# sourceMappingURL=potentTools-1.0.0.js.map
+//# sourceMappingURL=potentTools-1.0.3.js.map
