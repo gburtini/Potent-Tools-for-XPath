@@ -23,7 +23,6 @@ Usage
 const { generators, evaluators, cssToXPath } = require('potent-tools');
 
 { // generators: generate XPath queries from elements.
-
   /*
   * Get the XPath string for a given DOM element: getElememtXPath(element)
   */
@@ -49,8 +48,6 @@ const { generators, evaluators, cssToXPath } = require('potent-tools');
 }
 
 { // evaluators: run XPath queries or CSS selectors to find elements
-
-
   /*
    * Get elements by XPath: evaluators.getElementsByXPath(document, xpathQuery)
    */
@@ -79,7 +76,6 @@ const { generators, evaluators, cssToXPath } = require('potent-tools');
 }
 
 { // cssToXPath: convert CSS queries to XPath queries
-
   console.log(cssToXPath('html > body')); // //html>body
 }
 
