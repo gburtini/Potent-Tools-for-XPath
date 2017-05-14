@@ -1,7 +1,10 @@
-const DOCUMENT_TYPE_NODE = 10; //https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
+if (typeof Node === 'undefined') {
+  // Non-browser polyfill for https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
+  Node = { DOCUMENT_TYPE_NOTE: 10 };
+}
 
 /**
- * Produces an XPath expression for the attributes of an element.
+ * Produces an object of attributes of an element.
  */
 function getElementAttributes(element) {
   const attributes = element.attributes;
@@ -19,6 +22,7 @@ function getElementAttributes(element) {
 
 /**
  * Parses a tree starting from `startingElement` to produce an XPath expression.
+ * TODO: it seems awkward that this has `asString` instead of being cast in the getElementXPath method; but this is the original design.
  */
 function getElementTreeXPath(startingElement, asString = true) {
   const paths = [];
@@ -36,11 +40,11 @@ function getElementTreeXPath(startingElement, asString = true) {
       sibling = sibling.previousSibling
     ) {
       // Ignore document type declaration.
-      if (sibling.nodeType === DOCUMENT_TYPE_NODE) continue;
+      if (sibling.nodeType === Node.DOCUMENT_TYPE_NODE) continue;
       if (sibling.nodeName === element.nodeName) index += 1;
     }
 
-    const tagName = (element.prefix ? element.prefix + ':' : '') +
+    const tagName = (element.prefix ? `${element.prefix}:` : '') +
       element.localName;
 
     const attributes = getElementAttributes(element);
@@ -61,7 +65,7 @@ function getElementTreeXPath(startingElement, asString = true) {
     };
 
     const pathIndex = index || hasFollowingSiblings
-      ? '[' + (index + 1) + ']'
+      ? `[${index + 1}]`
       : '';
     const returnValue = asString ? tagName + pathIndex : node;
 
@@ -69,7 +73,7 @@ function getElementTreeXPath(startingElement, asString = true) {
     paths.splice(0, 0, returnValue);
   }
 
-  if (asString) return paths.length ? '/' + paths.join('/') : null;
+  if (asString) return paths.length ? `/${paths.join('/')}` : null;
   return paths.length ? paths : null;
 }
 

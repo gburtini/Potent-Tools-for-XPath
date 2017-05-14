@@ -24,5 +24,5 @@ describe('Original Firebug tests', () => {
 
     const xpath = generators.getElementTreeXPath(childDiv1);
     expect(xpath).to.be.equal('/html/body/div/div[1]', 'Incorrect XPath');
-  })
+  });
 });

@@ -106,9 +106,7 @@ describe('generators', () => {
       let xpathResult;
 
       xpathResult = generators.getElementXPath(childDiv2);
-      expect(xpathResult).to.be.equal(
-        '//*[@id="identifier"]'
-      );
+      expect(xpathResult).to.be.equal('//*[@id="identifier"]');
 
       xpathResult = generators.getElementXPath(childDiv2, true);
       expect(xpathResult).to.be.equal(

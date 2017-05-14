@@ -1,7 +1,7 @@
 const expect = require('chai').expect;
 const jsdom = require('jsdom');
 const evaluators = require('../src/evaluators');
-const {XPathResult} = require('xpath');
+const { XPathResult } = require('xpath');
 function newDocument() {
   const options = {};
   const doc = jsdom.jsdom(null, options);
@@ -79,7 +79,7 @@ describe('evaluators', () => {
     it('should support a similar lookup by CSS rule', () => {
       // NOTE: opposite parameter order originates in Mozilla code.
       const result = evaluators.getRuleMatchingElements(
-        {selectorText: '.test'},
+        { selectorText: '.test' },
         document
       );
       expect(result).to.have.length(1);
