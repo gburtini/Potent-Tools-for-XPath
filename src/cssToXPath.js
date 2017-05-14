@@ -9,7 +9,9 @@ function specialSelectorToXPathPiece(element) {
       return `[contains(concat(' ',normalize-space(@class),' '), ' ${element.specialSelectorValue} ')]`;
       break;
     default:
-      throw new Error(`Invalid special selector type: ${element.specialSelectorType}.`);
+      throw new Error(
+        `Invalid special selector type: ${element.specialSelectorType}.`
+      );
   }
 }
 
@@ -75,9 +77,9 @@ function cssToXPath(rule) {
     // Match combinators, e.g. html > body or html + body.
     const combinator = patterns.combinator(rule);
     if (combinator && combinator.fullGroup.length) {
-      if (combinator.fullGroup.indexOf('>') != -1)
+      if (combinator.fullGroup.indexOf('>') != -1) {
         parts.push('/');
-      else if (combinator.fullGroup.indexOf('+') != -1) {
+      } else if (combinator.fullGroup.indexOf('+') != -1) {
         parts.push('/following-sibling::');
       } else {
         parts.push('//');

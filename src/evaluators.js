@@ -20,7 +20,7 @@ if (typeof XPathResult === 'undefined') {
  * @returns {*} The result of the XPath expression, depending on resultType:
  * - XPathResult.NUMBER_TYPE: returns a Number
  * - XPathResult.STRING_TYPE: returns a String
- * - XPathResult.BOOLEAN_TYP: returns a boolean
+ * - XPathResult.BOOLEAN_TYPE: returns a boolean
  * - XPathResult.UNORDERED_NODE_ITERATOR_TYPE or XPathResult.ORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
  * - XPathResult.ORDERED_NODE_SNAPSHOT_TYPE or XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
  * - XPathResult.ANY_UNORDERED_NODE_TYPE or XPathResult.FIRST_ORDERED_NODE_TYPE: returns a single node
@@ -65,6 +65,14 @@ function evaluateXPath(
   }
 }
 
+function getElementsByXPath(doc, xpath) {
+  try {
+    return evaluateXPath(doc, xpath);
+  } catch (ex) {
+    return [];
+  }
+}
+
 function getRuleMatchingElements(rule, doc) {
   const css = rule.selectorText;
   const xpath = cssToXPath(css);
@@ -74,14 +82,6 @@ function getRuleMatchingElements(rule, doc) {
 function getElementsBySelector(doc, css) {
   const xpath = cssToXPath(css);
   return getElementsByXPath(doc, xpath);
-}
-
-function getElementsByXPath(doc, xpath) {
-  try {
-    return evaluateXPath(doc, xpath);
-  } catch (ex) {
-    return [];
-  }
 }
 
 module.exports = {

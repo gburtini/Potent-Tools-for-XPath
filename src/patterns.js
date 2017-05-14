@@ -50,7 +50,7 @@ function attributePresence(string) {
 /**
  * `attributeValue(string)` matches the pieces of a CSS selector that represent a attribute selector.
  *  e.g., [disabled='disabled'], [class~='alphaghettis'], [type != 'number']
- * 
+ *
  * TODO: this pattern fails on single or unquoted things. Bad!
  */
 function attributeValue(string) {

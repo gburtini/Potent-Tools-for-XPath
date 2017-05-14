@@ -17,7 +17,9 @@ describe('cssToXPath', () => {
     expect(cssToXPath('html > body')).to.be.equal('//html/body');
   });
   it('should be able to convert html + body', () => {
-    expect(cssToXPath('html + body')).to.be.equal('//html/following-sibling::body');
+    expect(cssToXPath('html + body')).to.be.equal(
+      '//html/following-sibling::body'
+    );
   });
   it('should be able to convert html body', () => {
     expect(cssToXPath('html body')).to.be.equal('//html//body');
@@ -32,15 +34,19 @@ describe('cssToXPath', () => {
   });
   it('should support comma options', () => {
     expect(cssToXPath('html, body')).to.be.equal('//html | //body');
-  });  
+  });
   it('should boolean attribute selectors', () => {
     expect(cssToXPath('html[doctype]')).to.be.equal('//html[@doctype]');
   });
   it('should equality attribute selectors', () => {
-    expect(cssToXPath('html[doctype="test"]')).to.be.equal('//html[@doctype=\'test\']');
+    expect(cssToXPath('html[doctype="test"]')).to.be.equal(
+      "//html[@doctype='test']"
+    );
   });
   it('should contains attribute selectors', () => {
-    expect(cssToXPath('html[doctype~="test"]')).to.be.equal('//html[contains(@doctype, \'test\')]');
+    expect(cssToXPath('html[doctype~="test"]')).to.be.equal(
+      "//html[contains(@doctype, 'test')]"
+    );
   });
   it('should ignore pseudoselectors', () => {
     expect(cssToXPath('html:visited')).to.be.equal('//html');
