@@ -21,6 +21,10 @@
     "coverage": "./node_modules/.bin/istanbul cover -- node_modules/.bin/_mocha",
     "build": "WEBPACK_ENV=build webpack"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gburtini/Potent-Tools-for-XPath.git"
+  },
   "author": "Giuseppe Burtini and the Firebug team",
   "license": "BSD-3-Clause",
   "dependencies": {
