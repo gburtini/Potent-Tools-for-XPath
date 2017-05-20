@@ -4,7 +4,11 @@ if (typeof Node === 'undefined') {
 }
 
 /**
- * Produces an object of attributes of an element.
+ * Produces an object containing the attributes of a DOM element.
+ *
+ * @param {DOMElement} element
+ * @returns {object} An object of attribute names to values. e.g., in
+ * `<img src='url' alt='text' />`, we return an object `{ src: 'url', alt: 'text' }`
  */
 function getElementAttributes(element) {
   const attributes = element.attributes;
@@ -18,8 +22,16 @@ function getElementAttributes(element) {
 }
 
 /**
- * Parses a tree starting from `startingElement` to produce an XPath expression.
- * TODO: it seems awkward that this has `asString` instead of being cast in the getElementXPath method; but this is the original design.
+ * Parses a tree starting from `element` to produce an XPath expression.
+ *
+ * TODO: it seems awkward that this has `asString` instead of being cast in the
+ * getElementXPath method; but this is the original design. A solution to this
+ * is to always return the object with a nice toString method attached. This is
+ * a breaking change and needs a promote major though.
+ *
+ * @param {DOMElement} element the element to identify with the expression 
+ * @param {boolean} asString return a string XPath query or an object representing the query?
+ * @returns {*} Either a string query or an object representing the string query.
  */
 function getElementTreeXPath(startingElement, asString = true) {
   const paths = [];
@@ -51,7 +63,7 @@ function getElementTreeXPath(startingElement, asString = true) {
       sibling && !hasFollowingSiblings;
       sibling = sibling.nextSibling
     ) {
-      if (sibling.nodeName == element.nodeName) hasFollowingSiblings = true;
+      if (sibling.nodeName === element.nodeName) hasFollowingSiblings = true;
     }
 
     const node = {
@@ -74,6 +86,7 @@ function getElementTreeXPath(startingElement, asString = true) {
   return paths.length ? paths : null;
 }
 
+
 /**
  * Gets an XPath expression for an element which describes its hierarchical location.
  */
@@ -81,6 +94,20 @@ function getElementXPath(element, skipId = false) {
   if (element && element.id && !skipId) return `//*[@id="${element.id}"]`;
   return getElementTreeXPath(element);
 }
+
+// TODO: XPath to Object? I think this belongs in generaotrs, too.
+function xPathToObject(xPath) {
+  const rows = xPath.replace(/\/\//, /\//).split('/');
+
+  return rows.map((row) => {
+    return {
+      index: /\[([0-9]*)\]/.exec(row),
+      attributes: {}, // TODO 
+      tag: /^[a-zA-Z]*/.exec(row),
+    };
+  });
+}
+
 
 module.exports = {
   getElementXPath,

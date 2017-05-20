@@ -1,12 +1,12 @@
-const cssToXPath = require('./cssToXPath');
+const cssToXPath = require('css-xpath');
 
 // This is the weirdest line in the entire product, but this supports node environment and
 // web browser environment without conditionally including the xpath module, which is important
 // because otherwise the variable reference is strange.
 if (typeof XPathResult === 'undefined') {
-  const xpath = require('xpath');
-  evaluate = xpath.evaluate;
-  XPathResult = xpath.XPathResult;
+  const xPath = require('xpath');
+  evaluate = xPath.evaluate;
+  XPathResult = xPath.XPathResult;
 }
 
 /**
@@ -63,25 +63,52 @@ function evaluateXPath(
     case XPathResult.FIRST_ORDERED_NODE_TYPE:
       return result.singleNodeValue;
   }
+
+  throw new Error('Unmatched XPathResult resultType in evaluateXPath.');
 }
 
-function getElementsByXPath(doc, xpath) {
+/**
+ * Get a list of elements matching a given XPath.
+ *
+ * @param {Document} doc
+ * @param {String} xpath The XPath expression.
+ * @returns {Array} An array of matching elements, in their natural XPath type: DOM nodes, strings, etc.
+ */
+function getElementsByXPath(doc, xPath) {
   try {
-    return evaluateXPath(doc, xpath);
+    return evaluateXPath(doc, xPath);
   } catch (ex) {
     return [];
   }
 }
 
+
+/**
+ * Get a list of elements matching a given CSS rule. Note the parameters are inverted
+ * to retain the mapping from the original library.
+ *
+ * @param {object} rule The `CSSStyleRule` object, containing at least a `selectorText`
+ *   https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleRule/selectorText
+ * @param {Document} doc
+ * @returns {Array} An array of matching elements.
+ */
 function getRuleMatchingElements(rule, doc) {
   const css = rule.selectorText;
-  const xpath = cssToXPath(css);
-  return getElementsByXPath(doc, xpath);
+  const xPath = cssToXPath(css);
+  return getElementsByXPath(doc, xPath);
 }
 
+/**
+ * Get a list of elements matching a given CSS rule. Note the parameters are inverted
+ * to retain the mapping from the original library.
+ *
+ * @param {Document} doc
+ * @param {String} css The CSS rule, as a string.
+ * @returns {Array} An array of matching elements.
+ */
 function getElementsBySelector(doc, css) {
-  const xpath = cssToXPath(css);
-  return getElementsByXPath(doc, xpath);
+  const xPath = cssToXPath(css);
+  return getElementsByXPath(doc, xPath);
 }
 
 module.exports = {

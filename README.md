@@ -27,9 +27,9 @@ const { generators, evaluators, cssToXPath } = require('potent-tools');
   * getElememtXPath(element)
   * Get the XPath string for a given DOM element.
   */
-  const xpath = generators.getElementXPath(domElement);
+  const xPath = generators.getElementXPath(domElement);
   // /html/head/body/table/tr[2]/td/strong[@class='title']
-  console.log(xpath); 
+  console.log(xPath); 
 
 
   /*
@@ -37,12 +37,12 @@ const { generators, evaluators, cssToXPath } = require('potent-tools');
   * Get the fully qualified XPath string for a DOM element that has an ID, ignoring ID.
   * e.g., `<html><body><div id='bob'></div></body></html>`
   */
-  const xpath = generators.getElementXPath(bobElement, skipId = true);
-  console.log(xpath); // /html/body/div[1]
+  const xPath = generators.getElementXPath(bobElement, skipId = true);
+  console.log(xPath); // /html/body/div[1]
 
   
-  const xpath = generators.getElementXPath(bobElement, skipId = false);
-  console.log(xpath); // //*[@id='bob']
+  const xPath = generators.getElementXPath(bobElement, skipId = false);
+  console.log(xPath); // //*[@id='bob']
 
 
   /*
@@ -85,15 +85,11 @@ const { generators, evaluators, cssToXPath } = require('potent-tools');
    * Execute a query on a document.
    * e.g., <html><body><div id='bob'>Hello world</div></body></html>
    */
-  const doc = document;
-  const xpath = '/html/body/div'
-  const contextNode = document; // optional, defaults to the document
-  const resultType = XPathResult.STRING_TYPE; // optional, defaults to ANY_TYPE.
   const stringResult = evaluators.evaluateXPath(
-    doc,
-    xpath,
-    contextNode,
-    resultType
+    document,
+    '/html/body/div',
+    document, // optional, defaults to the document
+    XPathResult.STRING_TYPE, // optional, defaults to ANY_TYPE.
   );
   console.log(stringResult); // "Hello world"
 }
