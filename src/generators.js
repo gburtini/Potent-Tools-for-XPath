@@ -57,13 +57,13 @@ function getElementTreeXPath(startingElement, asString = true) {
       element.localName;
 
     const attributes = getElementAttributes(element);
-    let hasFollowingSiblings = false;
+    let hasFollowingSiblingsWithSameTag = false;
     for (
       let sibling = element.nextSibling;
-      sibling && !hasFollowingSiblings;
+      sibling && !hasFollowingSiblingsWithSameTag;
       sibling = sibling.nextSibling
     ) {
-      if (sibling.nodeName === element.nodeName) hasFollowingSiblings = true;
+      if (sibling.nodeName === element.nodeName) hasFollowingSiblingsWithSameTag = true;
     }
 
     const node = {
@@ -71,9 +71,12 @@ function getElementTreeXPath(startingElement, asString = true) {
       index,
       attributes,
       elements: [element], // the list of things that made up this node
+      meta: {
+        hasFollowingSiblings: hasFollowingSiblingsWithSameTag,
+      },
     };
 
-    const pathIndex = index || hasFollowingSiblings
+    const pathIndex = index || hasFollowingSiblingsWithSameTag
       ? `[${index + 1}]`
       : '';
     const returnValue = asString ? tagName + pathIndex : node;
@@ -95,7 +98,7 @@ function getElementXPath(element, skipId = false) {
   return getElementTreeXPath(element);
 }
 
-// TODO: XPath to Object? I think this belongs in generaotrs, too.
+// TODO: XPath string to Object? I think this belongs in generaotrs or the class, too.
 function xPathToObject(xPath) {
   const rows = xPath.replace(/\/\//, /\//).split('/');
 
@@ -104,6 +107,7 @@ function xPathToObject(xPath) {
       index: /\[([0-9]*)\]/.exec(row),
       attributes: {}, // TODO 
       tag: /^[a-zA-Z]*/.exec(row),
+      elements: 'TODO'
     };
   });
 }
