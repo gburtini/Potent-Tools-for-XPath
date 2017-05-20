@@ -80,116 +80,258 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const patterns = __webpack_require__(1);
-
-function specialSelectorToXPathPiece(element) {
-  switch (element.specialSelectorType) {
-    case '#': // ID
-      return `[@id='${element.specialSelectorValue}']`;
-      break;
-    case '.': // class
-      return `[contains(concat(' ',normalize-space(@class),' '), ' ${element.specialSelectorValue} ')]`;
-      break;
-    default:
-      throw new Error(
-        `Invalid special selector type: ${element.specialSelectorType}.`
-      );
-  }
-}
-
-function cssToXPath(rule) {
-  let index = 1;
-  const parts = ['//', '*'];
-  let lastRule = null;
-
-  while (rule.length && rule != lastRule) {
-    lastRule = rule;
-
-    // Trim leading whitespace
-    rule = rule.trim(rule); // TODO: wtf?
-    if (!rule.length) break;
-
-    // Match the element identifier, matches rules of the form "body", ".class" and "#id"
-    const element = patterns.element(rule);
-    if (element) {
-      if (element.specialSelectorType) {
-        parts.push(specialSelectorToXPathPiece(element));
-      } else if (element.namespace) {
-        // TODO: can we change these to just be parts.push and put everything in a elementToXPathPiece function?
-        // probably not, as they're replacing the // rule, initially. If not, leave documentation comment here.
-        parts[index] = element.namespace;
-      } else {
-        parts[index] = element.elementName;
-      }
-
-      rule = rule.substr(element.fullGroup.length);
-    }
-
-    // Match attribute selectors
-    const attribute = patterns.attributeValue(rule);
-    if (attribute) {
-      // matched a rule like [field~='thing'] or [name='Title']
-      if (attribute.isContains) {
-        parts.push(`[contains(@${attribute.field}, '${attribute.value}')]`);
-      } else {
-        parts.push(`[@${attribute.field}='${attribute.value}']`);
-      }
-
-      rule = rule.substr(attribute.fullGroup.length);
-    } else {
-      // matches rules like [mustExist], e.g., [disabled].
-      const attributePresence = patterns.attributePresence(rule);
-      if (attributePresence) {
-        parts.push(`[@${attributePresence.attributeName}]`);
-
-        rule = rule.substr(attributePresence.fullGroup.length);
-      }
-    }
-
-    // Skip over pseudo-classes and pseudo-elements, which are of no use to us
-    // e.g., :nth-child and :visited.
-    let pseudoGroups = patterns.pseudo(rule);
-    while (pseudoGroups) {
-      rule = rule.substr(pseudoGroups.fullGroup.length);
-
-      // if there are many, just skip them all right now.
-      pseudoGroups = patterns.pseudo(rule);
-    }
-
-    // Match combinators, e.g. html > body or html + body.
-    const combinator = patterns.combinator(rule);
-    if (combinator && combinator.fullGroup.length) {
-      if (combinator.fullGroup.indexOf('>') != -1) {
-        parts.push('/');
-      } else if (combinator.fullGroup.indexOf('+') != -1) {
-        parts.push('/following-sibling::');
-      } else {
-        parts.push('//');
-      }
-
-      index = parts.length;
-      parts.push('*');
-      rule = rule.substr(combinator.fullGroup.length);
-    }
-
-    // Match comma delimited disjunctions ("or" rules), e.g., html, body
-    const disjunction = patterns.comma(rule);
-    if (disjunction) {
-      parts.push(' | ', '//', '*');
-      index = parts.length - 1;
-      rule = rule.substr(disjunction.fullGroup.length);
-    }
-  }
-
-  const xpath = parts.join('');
-  return xpath;
-}
-
-module.exports = cssToXPath;
+module.exports = __webpack_require__(5);
 
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const cssToXPath = __webpack_require__(0);
+
+// This is the weirdest line in the entire product, but this supports node environment and
+// web browser environment without conditionally including the xpath module, which is important
+// because otherwise the variable reference is strange.
+if (typeof XPathResult === 'undefined') {
+  const xPath = __webpack_require__(7);
+  evaluate = xPath.evaluate;
+  XPathResult = xPath.XPathResult;
+}
+
+/**
+ * Evaluates an XPath expression.
+ *
+ * @param {Document} doc
+ * @param {String} xpath The XPath expression.
+ * @param {Node} contextNode The context node.
+ * @param {int} resultType
+ *
+ * @returns {*} The result of the XPath expression, depending on resultType:
+ * - XPathResult.NUMBER_TYPE: returns a Number
+ * - XPathResult.STRING_TYPE: returns a String
+ * - XPathResult.BOOLEAN_TYPE: returns a boolean
+ * - XPathResult.UNORDERED_NODE_ITERATOR_TYPE or XPathResult.ORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
+ * - XPathResult.ORDERED_NODE_SNAPSHOT_TYPE or XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
+ * - XPathResult.ANY_UNORDERED_NODE_TYPE or XPathResult.FIRST_ORDERED_NODE_TYPE: returns a single node
+ */
+function evaluateXPath(
+  doc,
+  xpath,
+  contextNode = doc,
+  resultType = XPathResult.ANY_TYPE
+) {
+  const evaluateMethod = doc.evaluate || evaluate;
+  const result = evaluateMethod(xpath, contextNode, null, resultType, null);
+
+  const nodes = [];
+  switch (result.resultType) {
+    case XPathResult.NUMBER_TYPE:
+      return result.numberValue;
+
+    case XPathResult.STRING_TYPE:
+      return result.stringValue;
+
+    case XPathResult.BOOLEAN_TYPE:
+      return result.booleanValue;
+
+    case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
+    case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
+      for (let item = result.iterateNext(); item; item = result.iterateNext()) {
+        nodes.push(item);
+      }
+      return nodes;
+
+    case XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE:
+    case XPathResult.ORDERED_NODE_SNAPSHOT_TYPE:
+      for (let i = 0; i < result.snapshotLength; ++i) {
+        nodes.push(result.snapshotItem(i));
+      }
+      return nodes;
+
+    case XPathResult.ANY_UNORDERED_NODE_TYPE:
+    case XPathResult.FIRST_ORDERED_NODE_TYPE:
+      return result.singleNodeValue;
+  }
+
+  throw new Error('Unmatched XPathResult resultType in evaluateXPath.');
+}
+
+/**
+ * Get a list of elements matching a given XPath.
+ *
+ * @param {Document} doc
+ * @param {String} xpath The XPath expression.
+ * @returns {Array} An array of matching elements, in their natural XPath type: DOM nodes, strings, etc.
+ */
+function getElementsByXPath(doc, xPath) {
+  try {
+    return evaluateXPath(doc, xPath);
+  } catch (ex) {
+    return [];
+  }
+}
+
+
+/**
+ * Get a list of elements matching a given CSS rule. Note the parameters are inverted
+ * to retain the mapping from the original library.
+ *
+ * @param {object} rule The `CSSStyleRule` object, containing at least a `selectorText`
+ *   https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleRule/selectorText
+ * @param {Document} doc
+ * @returns {Array} An array of matching elements.
+ */
+function getRuleMatchingElements(rule, doc) {
+  const css = rule.selectorText;
+  const xPath = cssToXPath(css);
+  return getElementsByXPath(doc, xPath);
+}
+
+/**
+ * Get a list of elements matching a given CSS rule. Note the parameters are inverted
+ * to retain the mapping from the original library.
+ *
+ * @param {Document} doc
+ * @param {String} css The CSS rule, as a string.
+ * @returns {Array} An array of matching elements.
+ */
+function getElementsBySelector(doc, css) {
+  const xPath = cssToXPath(css);
+  return getElementsByXPath(doc, xPath);
+}
+
+module.exports = {
+  evaluateXPath,
+  getElementsByXPath,
+  getElementsBySelector,
+  getRuleMatchingElements,
+};
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+if (typeof Node === 'undefined') {
+  // Non-browser polyfill for https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
+  Node = { DOCUMENT_TYPE_NOTE: 10 };
+}
+
+/**
+ * Produces an object containing the attributes of a DOM element.
+ *
+ * @param {DOMElement} element
+ * @returns {object} An object of attribute names to values. e.g., in
+ * `<img src='url' alt='text' />`, we return an object `{ src: 'url', alt: 'text' }`
+ */
+function getElementAttributes(element) {
+  const attributes = element.attributes;
+  const ret = {};
+  for (let i = 0; i < attributes.length; i++) {
+    const attribute = attributes.item(i);
+    ret[attribute.nodeName] = attribute.nodeValue;
+  }
+
+  return ret;
+}
+
+/**
+ * Parses a tree starting from `element` to produce an XPath expression.
+ *
+ * TODO: it seems awkward that this has `asString` instead of being cast in the
+ * getElementXPath method; but this is the original design. A solution to this
+ * is to always return the object with a nice toString method attached. This is
+ * a breaking change and needs a promote major though.
+ *
+ * @param {DOMElement} element the element to identify with the expression 
+ * @param {boolean} asString return a string XPath query or an object representing the query?
+ * @returns {*} Either a string query or an object representing the string query.
+ */
+function getElementTreeXPath(startingElement, asString = true) {
+  const paths = [];
+
+  // Use nodeName (instead of localName) so namespace prefix is included (if any).
+  for (
+    let element = startingElement;
+    element && element.nodeType === 1;
+    element = element.parentNode
+  ) {
+    let index = 0;
+    for (
+      let sibling = element.previousSibling;
+      sibling;
+      sibling = sibling.previousSibling
+    ) {
+      // Ignore document type declaration.
+      if (sibling.nodeType === Node.DOCUMENT_TYPE_NODE) continue;
+      if (sibling.nodeName === element.nodeName) index += 1;
+    }
+
+    const tagName = (element.prefix ? `${element.prefix}:` : '') +
+      element.localName;
+
+    const attributes = getElementAttributes(element);
+    let hasFollowingSiblings = false;
+    for (
+      let sibling = element.nextSibling;
+      sibling && !hasFollowingSiblings;
+      sibling = sibling.nextSibling
+    ) {
+      if (sibling.nodeName === element.nodeName) hasFollowingSiblings = true;
+    }
+
+    const node = {
+      tag: tagName,
+      index,
+      attributes,
+      elements: [element], // the list of things that made up this node
+    };
+
+    const pathIndex = index || hasFollowingSiblings
+      ? `[${index + 1}]`
+      : '';
+    const returnValue = asString ? tagName + pathIndex : node;
+
+    // push to front of array.
+    paths.splice(0, 0, returnValue);
+  }
+
+  if (asString) return paths.length ? `/${paths.join('/')}` : null;
+  return paths.length ? paths : null;
+}
+
+
+/**
+ * Gets an XPath expression for an element which describes its hierarchical location.
+ */
+function getElementXPath(element, skipId = false) {
+  if (element && element.id && !skipId) return `//*[@id="${element.id}"]`;
+  return getElementTreeXPath(element);
+}
+
+// TODO: XPath to Object? I think this belongs in generaotrs, too.
+function xPathToObject(xPath) {
+  const rows = xPath.replace(/\/\//, /\//).split('/');
+
+  return rows.map((row) => {
+    return {
+      index: /\[([0-9]*)\]/.exec(row),
+      attributes: {}, // TODO 
+      tag: /^[a-zA-Z]*/.exec(row),
+    };
+  });
+}
+
+
+module.exports = {
+  getElementXPath,
+  getElementTreeXPath,
+  getElementAttributes,
+};
+
+
+/***/ }),
+/* 3 */
 /***/ (function(module, exports) {
 
 /**
@@ -314,212 +456,254 @@ module.exports = {
 
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-const cssToXPath = __webpack_require__(0);
-
-// This is the weirdest line in the entire product, but this supports node environment and
-// web browser environment without conditionally including the xpath module, which is important
-// because otherwise the variable reference is strange.
-if (typeof XPathResult === 'undefined') {
-  const xpath = __webpack_require__(5);
-  evaluate = xpath.evaluate;
-  XPathResult = xpath.XPathResult;
-}
-
-/**
- * Evaluates an XPath expression.
- *
- * @param {Document} doc
- * @param {String} xpath The XPath expression.
- * @param {Node} contextNode The context node.
- * @param {int} resultType
- *
- * @returns {*} The result of the XPath expression, depending on resultType:
- * - XPathResult.NUMBER_TYPE: returns a Number
- * - XPathResult.STRING_TYPE: returns a String
- * - XPathResult.BOOLEAN_TYPE: returns a boolean
- * - XPathResult.UNORDERED_NODE_ITERATOR_TYPE or XPathResult.ORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
- * - XPathResult.ORDERED_NODE_SNAPSHOT_TYPE or XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
- * - XPathResult.ANY_UNORDERED_NODE_TYPE or XPathResult.FIRST_ORDERED_NODE_TYPE: returns a single node
- */
-function evaluateXPath(
-  doc,
-  xpath,
-  contextNode = doc,
-  resultType = XPathResult.ANY_TYPE
-) {
-  const evaluateMethod = doc.evaluate || evaluate;
-  const result = evaluateMethod(xpath, contextNode, null, resultType, null);
-
-  const nodes = [];
-  switch (result.resultType) {
-    case XPathResult.NUMBER_TYPE:
-      return result.numberValue;
-
-    case XPathResult.STRING_TYPE:
-      return result.stringValue;
-
-    case XPathResult.BOOLEAN_TYPE:
-      return result.booleanValue;
-
-    case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
-    case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
-      for (let item = result.iterateNext(); item; item = result.iterateNext()) {
-        nodes.push(item);
-      }
-      return nodes;
-
-    case XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE:
-    case XPathResult.ORDERED_NODE_SNAPSHOT_TYPE:
-      for (let i = 0; i < result.snapshotLength; ++i) {
-        nodes.push(result.snapshotItem(i));
-      }
-      return nodes;
-
-    case XPathResult.ANY_UNORDERED_NODE_TYPE:
-    case XPathResult.FIRST_ORDERED_NODE_TYPE:
-      return result.singleNodeValue;
-  }
-}
-
-function getElementsByXPath(doc, xpath) {
-  try {
-    return evaluateXPath(doc, xpath);
-  } catch (ex) {
-    return [];
-  }
-}
-
-function getRuleMatchingElements(rule, doc) {
-  const css = rule.selectorText;
-  const xpath = cssToXPath(css);
-  return getElementsByXPath(doc, xpath);
-}
-
-function getElementsBySelector(doc, css) {
-  const xpath = cssToXPath(css);
-  return getElementsByXPath(doc, xpath);
-}
-
-module.exports = {
-  evaluateXPath,
-  getElementsByXPath,
-  getElementsBySelector,
-  getRuleMatchingElements,
-};
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports) {
-
-if (typeof Node === 'undefined') {
-  // Non-browser polyfill for https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
-  Node = { DOCUMENT_TYPE_NOTE: 10 };
-}
-
-/**
- * Produces an object of attributes of an element.
- */
-function getElementAttributes(element) {
-  const attributes = element.attributes;
-  const ret = {};
-  for (let i = 0; i < attributes.length; i++) {
-    const attribute = attributes.item(i);
-    ret[attribute.nodeName] = attribute.nodeValue;
-  }
-
-  return ret;
-}
-
-/**
- * Parses a tree starting from `startingElement` to produce an XPath expression.
- * TODO: it seems awkward that this has `asString` instead of being cast in the getElementXPath method; but this is the original design.
- */
-function getElementTreeXPath(startingElement, asString = true) {
-  const paths = [];
-
-  // Use nodeName (instead of localName) so namespace prefix is included (if any).
-  for (
-    let element = startingElement;
-    element && element.nodeType === 1;
-    element = element.parentNode
-  ) {
-    let index = 0;
-    for (
-      let sibling = element.previousSibling;
-      sibling;
-      sibling = sibling.previousSibling
-    ) {
-      // Ignore document type declaration.
-      if (sibling.nodeType === Node.DOCUMENT_TYPE_NODE) continue;
-      if (sibling.nodeName === element.nodeName) index += 1;
-    }
-
-    const tagName = (element.prefix ? `${element.prefix}:` : '') +
-      element.localName;
-
-    const attributes = getElementAttributes(element);
-    let hasFollowingSiblings = false;
-    for (
-      let sibling = element.nextSibling;
-      sibling && !hasFollowingSiblings;
-      sibling = sibling.nextSibling
-    ) {
-      if (sibling.nodeName == element.nodeName) hasFollowingSiblings = true;
-    }
-
-    const node = {
-      tag: tagName,
-      index,
-      attributes,
-      elements: [element], // the list of things that made up this node
-    };
-
-    const pathIndex = index || hasFollowingSiblings
-      ? `[${index + 1}]`
-      : '';
-    const returnValue = asString ? tagName + pathIndex : node;
-
-    // push to front of array.
-    paths.splice(0, 0, returnValue);
-  }
-
-  if (asString) return paths.length ? `/${paths.join('/')}` : null;
-  return paths.length ? paths : null;
-}
-
-/**
- * Gets an XPath expression for an element which describes its hierarchical location.
- */
-function getElementXPath(element, skipId = false) {
-  if (element && element.id && !skipId) return `//*[@id="${element.id}"]`;
-  return getElementTreeXPath(element);
-}
-
-module.exports = {
-  getElementXPath,
-  getElementTreeXPath,
-  getElementAttributes,
-};
-
-
-/***/ }),
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = {
   cssToXPath: __webpack_require__(0),
-  evaluators: __webpack_require__(2),
-  generators: __webpack_require__(3),
-  patterns: __webpack_require__(1),
+  evaluators: __webpack_require__(1),
+  generators: __webpack_require__(2),
+  patterns: __webpack_require__(3),
 };
 
 
 /***/ }),
 /* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const patterns = __webpack_require__(6);
+
+function specialSelectorToXPathPiece(element) {
+  switch (element.specialSelectorType) {
+    case '#': // ID
+      return `[@id='${element.specialSelectorValue}']`;
+    case '.': // class
+      return `[contains(concat(' ',normalize-space(@class),' '), ' ${element.specialSelectorValue} ')]`;
+    default:
+      throw new Error(
+        `Invalid special selector type: ${element.specialSelectorType}.`
+      );
+  }
+}
+
+function cssXPath(rule) {
+  let index = 1;
+  const parts = ['//', '*'];
+  let lastRule = null;
+
+  while (rule.length && rule !== lastRule) {
+    lastRule = rule;
+
+    // Trim leading whitespace
+    rule = rule.trim(rule); // TODO: wtf?
+    if (!rule.length) break;
+
+    // Match the element identifier, matches rules of the form "body", ".class" and "#id"
+    const element = patterns.element(rule);
+    if (element) {
+      if (element.specialSelectorType) {
+        parts.push(specialSelectorToXPathPiece(element));
+      } else if (element.namespace) {
+        // TODO: can we change these to just be parts.push and put everything in a elementToXPathPiece function?
+        // probably not, as they're replacing the // rule, initially. If not, leave documentation comment here.
+        parts[index] = element.namespace;
+      } else {
+        parts[index] = element.elementName;
+      }
+
+      rule = rule.substr(element.fullGroup.length);
+    }
+
+    // Match attribute selectors
+    const attribute = patterns.attributeValue(rule);
+    if (attribute) {
+      // matched a rule like [field~='thing'] or [name='Title']
+      if (attribute.isContains) {
+        parts.push(`[contains(@${attribute.field}, '${attribute.value}')]`);
+      } else {
+        parts.push(`[@${attribute.field}='${attribute.value}']`);
+      }
+
+      rule = rule.substr(attribute.fullGroup.length);
+    } else {
+      // matches rules like [mustExist], e.g., [disabled].
+      const attributePresence = patterns.attributePresence(rule);
+      if (attributePresence) {
+        parts.push(`[@${attributePresence.attributeName}]`);
+
+        rule = rule.substr(attributePresence.fullGroup.length);
+      }
+    }
+
+    // Skip over pseudo-classes and pseudo-elements, which are of no use to us
+    // e.g., :nth-child and :visited.
+    let pseudoGroups = patterns.pseudo(rule);
+    while (pseudoGroups) {
+      rule = rule.substr(pseudoGroups.fullGroup.length);
+
+      // if there are many, just skip them all right now.
+      pseudoGroups = patterns.pseudo(rule);
+    }
+
+    // Match combinators, e.g. html > body or html + body.
+    const combinator = patterns.combinator(rule);
+    if (combinator && combinator.fullGroup.length) {
+      if (combinator.fullGroup.indexOf('>') !== -1) {
+        parts.push('/');
+      } else if (combinator.fullGroup.indexOf('+') !== -1) {
+        parts.push('/following-sibling::');
+      } else {
+        parts.push('//');
+      }
+
+      index = parts.length;
+      parts.push('*');
+      rule = rule.substr(combinator.fullGroup.length);
+    }
+
+    // Match comma delimited disjunctions ("or" rules), e.g., html, body
+    const disjunction = patterns.comma(rule);
+    if (disjunction) {
+      parts.push(' | ', '//', '*');
+      index = parts.length - 1;
+      rule = rule.substr(disjunction.fullGroup.length);
+    }
+  }
+
+  const xPath = parts.join('');
+  return xPath;
+}
+
+module.exports = cssXPath;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+/**
+ * This file's primary purpose is to turn a bunch of hard-to-read regular expressions
+ * in to self-documenting functions with appropriate named capture groups and minimal
+ * meaning parsing.
+ */
+
+/**
+ * `element(string)` matches the pieces of an initial CSS selector and returns a parsed set of fields.
+ * e.g., #id, .class or body
+ *
+ * It also parses out the piped namespace piece: https://www.w3.org/TR/css3-selectors/#univnmsp
+ */
+function element(string) {
+  const CSS_ELEMENT_PATTERN = /^([#.]?)([a-z0-9\\*_-]*)((\|)([a-z0-9\\*_-]*))?/i;
+  const matches = CSS_ELEMENT_PATTERN.exec(string);
+  if (!matches) return matches;
+
+  const retVal = {
+    fullGroup: matches[0],
+    fullNamespaceGroup: matches[3],
+    namespace: matches[5], // TODO: this is backwards, handle namespace standardization here.
+  };
+
+  // either "#" or "." to indicate id or class selector
+  if (matches[1] === '#' || matches[1] === '.') {
+    retVal.specialSelectorType = matches[1];
+    retVal.specialSelectorValue = matches[2];
+  } else if (matches[1] === '') {
+    retVal.elementName = matches[2];
+  }
+
+  return retVal;
+}
+
+/**
+ * `attributePresence(string)` matches the pieces of a CSS selector that represent a attribute presence requirement.
+ *  e.g., [disabled], [x-anything-here]
+ */
+function attributePresence(string) {
+  const CSS_ATTRIBUTE_PRESENCE_PATTERN = /^\[([^\]]*)\]/i;
+  const matches = CSS_ATTRIBUTE_PRESENCE_PATTERN.exec(string);
+  if (!matches) return matches;
+
+  return {
+    fullGroup: matches[0],
+    attributeName: matches[1],
+  };
+}
+
+/**
+ * `attributeValue(string)` matches the pieces of a CSS selector that represent a attribute selector.
+ *  e.g., [disabled='disabled'], [class~='alphaghettis'], [type != 'number']
+ *
+ * TODO: this pattern fails on single or unquoted things. Bad!
+ */
+function attributeValue(string) {
+  const CSS_ATTRIBUTE_VALUE_PATTERN = /^\[\s*([^~=\s]+)\s*(~?=)\s*"([^"]+)"\s*\]/i;
+  const matches = CSS_ATTRIBUTE_VALUE_PATTERN.exec(string);
+  if (!matches) return matches;
+
+  return {
+    fullGroup: matches[0],
+    field: matches[1],
+    value: matches[3],
+    isContains: matches[2] === '~=',
+  };
+}
+
+/**
+ * `pseudo(string)` matches the pieces of a CSS selector that represent a pseudo selector.
+ *  e.g., :first-child, :visited
+ */
+// TODO: verify this works with parentheses, e.g., nth-child(2).
+function pseudo(string) {
+  const CSS_PSEUDO_PATTERN = /^:([a-z_-])+/i;
+  const matches = CSS_PSEUDO_PATTERN.exec(string);
+  if (!matches) return matches;
+
+  return {
+    fullGroup: matches[0],
+    selector: matches[1],
+  };
+}
+
+/**
+ * `combinator(string)` matches the pieces of a CSS selector that represent a combinator.
+ *  e.g., + or >
+ */
+function combinator(string) {
+  const CSS_COMBINATOR_PATTERN = /^(\s*[>+\s])?/i;
+  const matches = CSS_COMBINATOR_PATTERN.exec(string);
+  if (!matches) return matches;
+
+  return {
+    fullGroup: matches[0],
+  };
+}
+
+/**
+ * `comma(string)` matches commas in a CSS selector; used for disjunction.
+ */
+function comma(string) {
+  const COMMA_PATTERN = /^\s*,/i;
+  const matches = COMMA_PATTERN.exec(string);
+  if (!matches) return matches;
+
+  return {
+    fullGroup: matches[0],
+  };
+}
+
+module.exports = {
+  element,
+  attributePresence,
+  attributeValue,
+  pseudo,
+  combinator,
+  comma,
+};
+
+
+/***/ }),
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -5255,4 +5439,4 @@ exports.select1 = function(e, doc) {
 /***/ })
 /******/ ]);
 });
-//# sourceMappingURL=potentTools-1.0.3.js.map
+//# sourceMappingURL=potentTools-1.1.3.js.map
