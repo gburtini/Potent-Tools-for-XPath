@@ -29,7 +29,7 @@ function getElementAttributes(element) {
  * is to always return the object with a nice toString method attached. This is
  * a breaking change and needs a promote major though.
  *
- * @param {DOMElement} element the element to identify with the expression 
+ * @param {DOMElement} element the element to identify with the expression
  * @param {boolean} asString return a string XPath query or an object representing the query?
  * @returns {*} Either a string query or an object representing the string query.
  */
@@ -97,21 +97,6 @@ function getElementXPath(element, skipId = false) {
   if (element && element.id && !skipId) return `//*[@id="${element.id}"]`;
   return getElementTreeXPath(element);
 }
-
-// TODO: XPath string to Object? I think this belongs in generaotrs or the class, too.
-function xPathToObject(xPath) {
-  const rows = xPath.replace(/\/\//, /\//).split('/');
-
-  return rows.map((row) => {
-    return {
-      index: /\[([0-9]*)\]/.exec(row),
-      attributes: {}, // TODO 
-      tag: /^[a-zA-Z]*/.exec(row),
-      elements: 'TODO'
-    };
-  });
-}
-
 
 module.exports = {
   getElementXPath,
