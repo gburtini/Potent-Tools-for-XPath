@@ -97,9 +97,9 @@ class XPathNode {
               "XPathNode::fromString is only partially implemented. We can't parse this XPath. Submit a pull request!"
             );
           }
-          
+
           return Object.assign({}, accumulator, valueMap);
-        }, 
+        },
         {}
       );
     }
