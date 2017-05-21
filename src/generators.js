@@ -1,3 +1,6 @@
+const XPathNodes = require('./types/XPathNodes');
+const XPathNode = require('./types/XPathNode');
+
 if (typeof Node === 'undefined') {
   // Non-browser polyfill for https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
   Node = { DOCUMENT_TYPE_NOTE: 10 };
@@ -34,8 +37,7 @@ function getElementAttributes(element) {
  * @returns {*} Either a string query or an object representing the string query.
  */
 function getElementTreeXPath(startingElement, asString = true) {
-  const paths = [];
-
+  const nodes = [];
   // Use nodeName (instead of localName) so namespace prefix is included (if any).
   for (
     let element = startingElement;
@@ -66,27 +68,22 @@ function getElementTreeXPath(startingElement, asString = true) {
       if (sibling.nodeName === element.nodeName) hasFollowingSiblingsWithSameTag = true;
     }
 
-    const node = {
+    const node = new XPathNode({
       tag: tagName,
-      index,
+      index: index + 1,
       attributes,
       elements: [element], // the list of things that made up this node
       meta: {
         hasFollowingSiblings: hasFollowingSiblingsWithSameTag,
       },
-    };
+    });
 
-    const pathIndex = index || hasFollowingSiblingsWithSameTag
-      ? `[${index + 1}]`
-      : '';
-    const returnValue = asString ? tagName + pathIndex : node;
-
-    // push to front of array.
-    paths.splice(0, 0, returnValue);
+    nodes.push(node);
   }
 
-  if (asString) return paths.length ? `/${paths.join('/')}` : null;
-  return paths.length ? paths : null;
+  const paths = new XPathNodes(nodes.reverse());
+  if (asString) return paths.toString();
+  return paths;
 }
 
 

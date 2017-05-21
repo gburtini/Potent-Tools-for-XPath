@@ -64,11 +64,9 @@ describe('generators', () => {
       parentDiv.appendChild(childDiv2);
       document.body.appendChild(parentDiv);
 
-      let xpathResult;
-
-      xpathResult = generators.getElementTreeXPath(childDiv1, false);
+      const xpathResult = generators.getElementTreeXPath(childDiv1, false);
       expect(xpathResult).to.have.length(4);
-      expect(xpathResult[0].tag).to.be.equal('html');
+      expect(xpathResult.nodes[0].tag).to.be.equal('html');
     });
   });
   describe('getElementAttributes', () => {
