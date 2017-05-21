@@ -25,7 +25,7 @@ const { generators, evaluators, cssToXPath } = require('potent-tools');
 
 { // generators: generate XPath queries from elements.
   /*
-  * getElememtXPath(element)
+  * generators.getElementXPath(element)
   * Get the XPath string for a given DOM element.
   */
   const xPath = generators.getElementXPath(domElement);
@@ -35,21 +35,29 @@ const { generators, evaluators, cssToXPath } = require('potent-tools');
 
   /*
   * generators.getElementXPath(element, skipId)
-  * Get the fully qualified XPath string for a DOM element that has an ID, ignoring ID.
+  * Get the fully qualified XPath string for a DOM element 
+  * that has an ID, ignoring ID.
   * e.g., `<html><body><div id='bob'></div></body></html>`
   */
-  const xPath = generators.getElementXPath(bobElement, skipId = true);
+  const xPath = generators.getElementXPath(
+    bobElement,
+    skipId = true
+  );
   console.log(xPath); // /html/body/div[1]
 
   
-  const xPath = generators.getElementXPath(bobElement, skipId = false);
+  const xPath = generators.getElementXPath(
+    bobElement,
+    skipId = false
+  );
   console.log(xPath); // //*[@id='bob']
 
 
   /*
   * generators.getElementAttributes(element)
   * Get all the HTML attributes on an element. 
-  * This is exposed, but it is a support method for the XPath generator.
+  * This is exposed, but it is a support method for the XPath
+  * generator.
   */
   const attributes = generators.getElementAttributes(bobElement);
   console.log(bobElement); // { id: 'bob' }
@@ -78,7 +86,11 @@ const { generators, evaluators, cssToXPath } = require('potent-tools');
    * getElementsBySelector(document, rule)
    * Get elements by CSS selector.
    */
-  const elements = evaluators.getElementsBySelector(document, 'html > body > div#id');
+  const elements = evaluators
+    .getElementsBySelector(
+      document,
+      'html > body > div#id'
+    );
   console.log(elements); // [ DOMElement ]
 
   /*
