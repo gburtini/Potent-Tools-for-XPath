@@ -21,7 +21,11 @@ Usage
 -----
 
 ```js
-const { generators, evaluators, cssToXPath } = require('potent-tools');
+const {
+  generators,
+  evaluators,
+  cssToXPath
+} = require('potent-tools');
 
 { // generators: generate XPath queries from elements.
   /*
