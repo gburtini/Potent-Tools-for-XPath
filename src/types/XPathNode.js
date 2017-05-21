@@ -85,7 +85,7 @@ class XPathNode {
                 [predicate.left.steps[0].name]: predicate.right.value,
               };
             } else if (predicate.id && predicate.id === 'contains') {
-              // TODO: these are weird special cases to handle the only forms we generate.
+              // NOTE: these are weird special cases to handle the only forms we generate.
               // a more general solution is welcome.
 
               const key = predicate.args[0].args[1].args[0].steps[0].name;

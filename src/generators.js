@@ -1,4 +1,4 @@
-const XPathNodes = require('./types/XPathNodes');
+const XPathQuery = require('./types/XPathQuery');
 const XPathNode = require('./types/XPathNode');
 
 if (typeof Node === 'undefined') {
@@ -81,7 +81,7 @@ function getElementTreeXPath(startingElement, asString = true) {
     nodes.push(node);
   }
 
-  const paths = new XPathNodes(nodes.reverse());
+  const paths = new XPathQuery(nodes.reverse());
   if (asString) return paths.toString();
   return paths;
 }

@@ -1,8 +1,8 @@
 const cssToXPath = require('css-xpath');
 
-// This is the weirdest line in the entire product, but this supports node environment and
-// web browser environment without conditionally including the xpath module, which is important
-// because otherwise the variable reference is strange.
+// This supports node environment and web browser environment without conditionally
+// including the xpath module, which is important because otherwise the variable
+// reference is strange. Consider it a partial polyfill.
 if (typeof XPathResult === 'undefined') {
   const xPath = require('xpath');
   evaluate = xPath.evaluate;

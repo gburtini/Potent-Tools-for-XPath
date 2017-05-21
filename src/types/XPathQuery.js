@@ -1,8 +1,9 @@
 const XPathNode = require('./XPathNode');
 const xPathParser = require('js-xpath');
 
-class XPathNodes {
+class XPathQuery {
   constructor(nodes = []) {
+    // TODO: support XPathNode construction here.
     if (
       !Array.isArray(nodes) ||
       nodes.filter(i => !(i instanceof XPathNode)).length
@@ -31,7 +32,7 @@ class XPathNodes {
   static fromString(xPath) {
     const parsed = xPathParser.parse(xPath);
     const rows = parsed.steps.map(i => i.toXPath());
-    return new XPathNodes(
+    return new XPathQuery(
       rows.map((row) => {
         return XPathNode.fromString(row);
       })
@@ -53,4 +54,4 @@ class XPathNodes {
   }
 }
 
-module.exports = XPathNodes;
+module.exports = XPathQuery;

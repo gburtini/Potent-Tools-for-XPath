@@ -1,10 +1,6 @@
 const expect = require('chai').expect;
 const XPathNode = require('../src/types/XPathNode');
 
-/**
- * XPathNode is not exposed by the package at the moment.
- * This is internal use and development only.
- */
 describe('XPathNode', () => {
   it('should be constructable', () => {
     expect(
