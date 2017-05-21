@@ -1,5 +1,4 @@
 const { splitAttributes } = require('separated-attributes');
-const { flatten } = require('lodash');
 const xPathParser = require('js-xpath');
 
 function attributesToXPath(attributes) {
@@ -56,6 +55,9 @@ class XPathNode {
   }
 
   static fromString(row) {
+    // TODO: maybe the way to do this elegantly is to push it back on the generator code. Instead of allowing fromString, only allow fromDom.
+    // I think for now, we don't need to worry about it. This method isn't exposed yet and thus doesn't affect any users of the package.
+
     const trialParsed = xPathParser.parse(row).steps;
     if (trialParsed.length !== 1) {
       throw new Error(

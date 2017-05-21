@@ -1,7 +1,7 @@
 {
   "name": "potent-tools",
   "library": "potentTools",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "A port, package and unit testing of Firebug's XPath parsing and processing tools.",
   "keywords": [
     "xpath",

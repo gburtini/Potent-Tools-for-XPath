@@ -1,4 +1,5 @@
 const XPathNode = require('./XPathNode');
+const xPathParser = require('js-xpath');
 
 class XPathNodes {
   constructor(nodes = []) {
@@ -28,9 +29,8 @@ class XPathNodes {
   }
 
   static fromString(xPath) {
-    // TODO: this explode is bad. Instead, use the parser.
-    const rows = xPath.replace(/\/\//, /\//).split('/').slice(1);
-
+    const parsed = xPathParser.parse(xPath);
+    const rows = parsed.steps.map(i => i.toXPath());
     return new XPathNodes(
       rows.map((row) => {
         return XPathNode.fromString(row);

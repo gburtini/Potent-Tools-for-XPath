@@ -17,6 +17,10 @@ const paragraphTag = new XPathNode({
   },
 });
 
+/**
+ * XPathNodes is not exposed by the package at the moment.
+ * This is internal use and development only.
+ */
 describe('XPathNodes', () => {
   it('should be constructable with an empty array', () => {
     expect(new XPathNodes([])).to.be.an.instanceOf(XPathNodes);
