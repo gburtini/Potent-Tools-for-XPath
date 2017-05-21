@@ -1,10 +1,13 @@
+/* eslint-disable no-undef */
 const cssToXPath = require('css-xpath');
 
 // This supports node environment and web browser environment without conditionally
 // including the xpath module, which is important because otherwise the variable
 // reference is strange. Consider it a partial polyfill.
 if (typeof XPathResult === 'undefined') {
+  // eslint-disable-next-line global-require
   const xPath = require('xpath');
+
   evaluate = xPath.evaluate;
   XPathResult = xPath.XPathResult;
 }
@@ -21,9 +24,12 @@ if (typeof XPathResult === 'undefined') {
  * - XPathResult.NUMBER_TYPE: returns a Number
  * - XPathResult.STRING_TYPE: returns a String
  * - XPathResult.BOOLEAN_TYPE: returns a boolean
- * - XPathResult.UNORDERED_NODE_ITERATOR_TYPE or XPathResult.ORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
- * - XPathResult.ORDERED_NODE_SNAPSHOT_TYPE or XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
- * - XPathResult.ANY_UNORDERED_NODE_TYPE or XPathResult.FIRST_ORDERED_NODE_TYPE: returns a single node
+ * - XPathResult.UNORDERED_NODE_ITERATOR_TYPE: returns an array of nodes
+ * - XPathResult.ORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
+ * - XPathResult.ORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
+ * - XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE: returns an array of nodes
+ * - XPathResult.ANY_UNORDERED_NODE_TYPE: returns a single node
+ * - XPathResult.FIRST_ORDERED_NODE_TYPE: returns a single node
  */
 function evaluateXPath(
   doc,
@@ -62,9 +68,10 @@ function evaluateXPath(
     case XPathResult.ANY_UNORDERED_NODE_TYPE:
     case XPathResult.FIRST_ORDERED_NODE_TYPE:
       return result.singleNodeValue;
-  }
 
-  throw new Error('Unmatched XPathResult resultType in evaluateXPath.');
+    default:
+      throw new Error(`Unexpected resultType passed to evaluateXPath: ${resultType}.`);
+  }
 }
 
 /**
@@ -72,7 +79,8 @@ function evaluateXPath(
  *
  * @param {Document} doc
  * @param {String} xpath The XPath expression.
- * @returns {Array} An array of matching elements, in their natural XPath type: DOM nodes, strings, etc.
+ * @returns {Array} An array of matching elements, in their natural XPath type:
+ * DOM nodes, strings, etc.
  */
 function getElementsByXPath(doc, xPath) {
   try {
@@ -81,7 +89,6 @@ function getElementsByXPath(doc, xPath) {
     return [];
   }
 }
-
 
 /**
  * Get a list of elements matching a given CSS rule. Note the parameters are inverted

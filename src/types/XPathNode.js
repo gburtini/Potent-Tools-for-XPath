@@ -55,13 +55,14 @@ class XPathNode {
   }
 
   static fromString(row) {
-    // TODO: maybe the way to do this elegantly is to push it back on the generator code. Instead of allowing fromString, only allow fromDom.
-    // I think for now, we don't need to worry about it. This method isn't exposed yet and thus doesn't affect any users of the package.
+    // TODO: maybe the way to do this elegantly is to push it back on the generator code.
+    // Instead of allowing fromString, only allow fromDom. This method isn't documented
+    // and shouldn't be used by anyone outside of Potent.
 
     const trialParsed = xPathParser.parse(row).steps;
     if (trialParsed.length !== 1) {
       throw new Error(
-        `XPathNode initialized with something that appears to be ${trialParsed.length} XPath nodes. Expected 1.`
+        `XPathNode initialized with ${trialParsed.length} XPath nodes. Expected 1.`
       );
     }
     const parsed = trialParsed[0];
@@ -96,7 +97,7 @@ class XPathNode {
             // TODO: there's an else case here we should probably error in.
           } catch (e) {
             throw new Error(
-              "XPathNode::fromString is only partially implemented. We can't parse this XPath. Submit a pull request!"
+              "XPathNode::fromString is only partial. We can't parse this. Submit a pull request!"
             );
           }
 

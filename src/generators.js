@@ -3,6 +3,7 @@ const XPathNode = require('./types/XPathNode');
 
 if (typeof Node === 'undefined') {
   // Non-browser polyfill for https://developer.mozilla.org/en/docs/Web/API/Node/nodeType
+  // eslint-disable-next-line no-undef
   Node = { DOCUMENT_TYPE_NOTE: 10 };
 }
 
@@ -51,6 +52,7 @@ function getElementTreeXPath(startingElement, asString = true) {
       sibling = sibling.previousSibling
     ) {
       // Ignore document type declaration.
+      // eslint-disable-next-line
       if (sibling.nodeType === Node.DOCUMENT_TYPE_NODE) continue;
       if (sibling.nodeName === element.nodeName) index += 1;
     }

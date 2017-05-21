@@ -50,7 +50,7 @@ describe('XPathNode', () => {
       expect(() => {
         XPathNode.fromString('/h/t/m/l');
       }).to.throw(
-        'XPathNode initialized with something that appears to be 4 XPath nodes. Expected 1.'
+        '4 XPath nodes. Expected 1.'
       );
     });
   });

@@ -1,3 +1,5 @@
+/* eslint-disable global-require */
+
 module.exports = {
   cssToXPath: require('css-xpath'),
   evaluators: require('./src/evaluators'),
@@ -6,5 +8,5 @@ module.exports = {
   types: {
     XPathNode: require('./src/types/XPathNode'),
     XPathQuery: require('./src/types/XPathQuery'),
-  }
+  },
 };
